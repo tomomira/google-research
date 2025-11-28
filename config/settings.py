@@ -2,6 +2,10 @@
 import os
 from pathlib import Path
 from typing import Optional
+from dotenv import load_dotenv
+
+# .envファイルを読み込み
+load_dotenv()
 
 
 class Settings:
@@ -15,6 +19,12 @@ class Settings:
     LOGS_DIR = BASE_DIR / "logs"
     OUTPUT_DIR = BASE_DIR / "output"
     PRESETS_DIR = CONFIG_DIR / "presets"
+
+    # 検索API設定
+    SEARCH_API_PROVIDER = os.getenv("SEARCH_API_PROVIDER", "tavily")  # "tavily" or "google"
+    TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+    GOOGLE_CX_ID = os.getenv("GOOGLE_CX_ID", "")
 
     # 検索設定のデフォルト値
     DEFAULT_NUM_RESULTS = 10

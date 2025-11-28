@@ -83,6 +83,13 @@ ERROR_MESSAGES = {
     "timeout_error": "タイムアウトしました。",
     "parse_error": "ページの解析に失敗しました。",
     "file_save_error": "ファイルの保存に失敗しました。",
+    "empty_keyword": "検索キーワードが空です。",
+    "empty_data": "出力するデータがありません。",
+    "invalid_url": "不正なURLです。",
+    "robots_denied": "robots.txtによりアクセスが拒否されました。",
+    "browser_start_failed": "ブラウザの起動に失敗しました。",
+    "browser_not_running": "ブラウザが起動していません。",
+    "page_load_timeout": "ページの読み込みがタイムアウトしました。",
 }
 
 # 成功メッセージ
@@ -90,4 +97,5 @@ SUCCESS_MESSAGES = {
     "search_completed": "検索が完了しました。",
     "extraction_completed": "情報抽出が完了しました。",
     "file_saved": "ファイルを保存しました: {filepath}",
+    "excel_saved": "Excelファイルを保存しました: {path}",
 }
