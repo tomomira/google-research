@@ -1,0 +1,25 @@
+{
+  "name": "デフォルト設定",
+  "description": "標準的な検索設定",
+  "search_options": {
+    "num_results": 10,
+    "region": "jp",
+    "language": "ja",
+    "period": null,
+    "site": null,
+    "exclude_keywords": []
+  },
+  "extraction_fields": {
+    "title": true,
+    "url": true,
+    "description": true,
+    "rank": true,
+    "phone": false,
+    "email": false,
+    "address": false,
+    "fax": false,
+    "company_name": false,
+    "sns_links": false
+  },
+  "wait_time": 3
+}
