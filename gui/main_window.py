@@ -15,6 +15,7 @@ from utils.logger import get_logger
 from gui.components.search_panel import SearchPanel, SearchConfig
 from gui.components.result_panel import ResultPanel
 from core.search_api import SearchAPIClient
+from core.searcher import SearchOptions
 from core.scraper import WebScraper
 from core.extractor import InfoExtractor
 from output.formatter import DataFormatter
@@ -228,9 +229,10 @@ class MainWindow(ctk.CTk):
 
             # 検索実行
             logger.info(f"Searching: {config.keyword}, num={config.num_results}")
+            search_options = SearchOptions(num_results=config.num_results)
             search_items = self.search_client.search(
-                query=config.keyword,
-                num_results=config.num_results
+                keyword=config.keyword,
+                options=search_options
             )
 
             if not search_items:
@@ -275,8 +277,9 @@ class MainWindow(ctk.CTk):
 
         except Exception as e:
             logger.error(f"Search failed: {e}", exc_info=True)
-            self.after(0, lambda: self.result_panel.show_error(f"検索エラー: {str(e)}"))
-            self.after(0, lambda: self.update_status(f"エラー: {str(e)}"))
+            error_msg = str(e)
+            self.after(0, lambda msg=error_msg: self.result_panel.show_error(f"検索エラー: {msg}"))
+            self.after(0, lambda msg=error_msg: self.update_status(f"エラー: {msg}"))
 
         finally:
             self.after(0, lambda: self.search_panel.set_search_running(False))
