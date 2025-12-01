@@ -103,7 +103,8 @@ def main():
                         detailed_infos.append(None)
 
                 except Exception as e:
-                    logger.error(f"Error extracting details from {item.url}: {e}")
+                    logger.warning(f"Failed to fetch details from {item.url}: {e}")
+                    print(f"  ⚠ スキップ: {item.url} (理由: {str(e)[:50]})")
                     detailed_infos.append(None)
 
             print(f"✓ 詳細情報の抽出が完了しました")

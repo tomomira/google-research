@@ -252,13 +252,19 @@ class MainWindow(ctk.CTk):
                 for i, item in enumerate(search_items, 1):
                     self.after(0, lambda i=i: self.result_panel.show_progress(f"  [{i}/{len(search_items)}] {item.url}"))
 
-                    # HTMLを取得
-                    page_content = self.scraper.fetch_page(item.url)
-                    if page_content and page_content.html:
-                        # 詳細情報を抽出
-                        detailed_info = self.extractor.extract_all(page_content.html)
-                        detailed_infos.append(detailed_info)
-                    else:
+                    try:
+                        # HTMLを取得
+                        page_content = self.scraper.fetch_page(item.url)
+                        if page_content and page_content.html:
+                            # 詳細情報を抽出
+                            detailed_info = self.extractor.extract_all(page_content.html)
+                            detailed_infos.append(detailed_info)
+                        else:
+                            detailed_infos.append(None)
+                    except Exception as e:
+                        # 個別のスクレイピングエラーはログに記録して続行
+                        logger.warning(f"Failed to fetch details from {item.url}: {e}")
+                        self.after(0, lambda url=item.url: self.result_panel.show_progress(f"  ⚠ スキップ: {url}"))
                         detailed_infos.append(None)
 
             # データの整形
