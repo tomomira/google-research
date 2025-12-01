@@ -66,7 +66,7 @@ class ExcelWriter:
             # DataFrameに変換
             df = pd.DataFrame([data.to_dict() for data in data_list])
 
-            # 列名の日本語化
+            # 列名の日本語化（Phase 2で営業時間・定休日を追加）
             column_names = {
                 "rank": "順位",
                 "title": "タイトル",
@@ -80,7 +80,9 @@ class ExcelWriter:
                 "company_name": "会社名・店舗名",
                 "sns_twitter": "Twitter",
                 "sns_facebook": "Facebook",
-                "sns_instagram": "Instagram"
+                "sns_instagram": "Instagram",
+                "business_hours": "営業時間",  # Phase 2で追加
+                "closed_days": "定休日"  # Phase 2で追加
             }
             df = df.rename(columns=column_names)
 
@@ -159,7 +161,7 @@ class ExcelWriter:
         """
         logger.debug("Auto-adjusting column widths")
 
-        # 列ごとの推奨幅を設定
+        # 列ごとの推奨幅を設定（Phase 2で営業時間・定休日を追加）
         column_widths = {
             "順位": 8,
             "タイトル": 40,
@@ -173,7 +175,9 @@ class ExcelWriter:
             "会社名・店舗名": 30,
             "Twitter": 40,
             "Facebook": 40,
-            "Instagram": 40
+            "Instagram": 40,
+            "営業時間": 30,  # Phase 2で追加
+            "定休日": 20  # Phase 2で追加
         }
 
         for col in range(1, worksheet.max_column + 1):
