@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 @dataclass
 class OutputData:
-    """出力用データ
+    """出力用データ（Phase 2で拡充）
 
     検索結果と詳細情報を統合したデータ構造。
     """
@@ -34,6 +34,8 @@ class OutputData:
     sns_twitter: str = ""
     sns_facebook: str = ""
     sns_instagram: str = ""
+    business_hours: str = ""  # Phase 2で追加
+    closed_days: str = ""  # Phase 2で追加
 
     def to_dict(self) -> dict:
         """辞書形式に変換
@@ -220,6 +222,14 @@ class DataFormatter:
                     output_data.sns_facebook = ", ".join(detailed_info.sns_links["facebook"])
                 if "instagram" in detailed_info.sns_links:
                     output_data.sns_instagram = ", ".join(detailed_info.sns_links["instagram"])
+
+            # 営業時間（Phase 2で追加）
+            if detailed_info.business_hours:
+                output_data.business_hours = detailed_info.business_hours
+
+            # 定休日（Phase 2で追加）
+            if detailed_info.closed_days:
+                output_data.closed_days = detailed_info.closed_days
 
         return output_data
 

@@ -17,13 +17,15 @@ logger = get_logger(__name__)
 
 @dataclass
 class DetailedInfo:
-    """詳細情報"""
+    """詳細情報（Phase 2で拡充）"""
     phone: list[str] = field(default_factory=list)
     email: list[str] = field(default_factory=list)
     address: Optional[dict] = None
     fax: list[str] = field(default_factory=list)
     company_name: Optional[str] = None
     sns_links: dict[str, list[str]] = field(default_factory=dict)
+    business_hours: Optional[str] = None  # Phase 2で追加
+    closed_days: Optional[str] = None  # Phase 2で追加
 
 
 class InfoExtractor:
@@ -44,7 +46,7 @@ class InfoExtractor:
         logger.info("InfoExtractor initialized")
 
     def extract_all(self, html: str) -> DetailedInfo:
-        """すべての情報を抽出
+        """すべての情報を抽出（Phase 2で拡充）
 
         HTMLからすべての情報を一度に抽出します。
 
@@ -62,7 +64,9 @@ class InfoExtractor:
             address=self.extract_address(html),
             fax=self.extract_fax(html),
             company_name=self.extract_company_name(html),
-            sns_links=self.extract_sns_links(html)
+            sns_links=self.extract_sns_links(html),
+            business_hours=self.extract_business_hours(html),  # Phase 2で追加
+            closed_days=self.extract_closed_days(html)  # Phase 2で追加
         )
 
         logger.info(f"Extraction completed: phone={len(detailed_info.phone)}, "
@@ -144,7 +148,7 @@ class InfoExtractor:
         return result
 
     def extract_address(self, html: str) -> Optional[dict]:
-        """住所を抽出
+        """住所を抽出（Phase 2で拡充）
 
         HTMLから住所を抽出します。
 
@@ -181,12 +185,33 @@ class InfoExtractor:
         prefecture_match = re.search(prefecture_pattern, text)
         prefecture = prefecture_match.group(0) if prefecture_match else None
 
+        # 市区町村の抽出（Phase 2で実装）
+        city = None
+        if prefecture:
+            # 都道府県の後に続く市区町村を抽出
+            city_pattern = rf'{re.escape(prefecture)}([^\s]+?[市区町村])'
+            city_match = re.search(city_pattern, text)
+            if city_match:
+                city = city_match.group(1)
+
+        # 詳細住所の抽出（Phase 2で実装）
+        full_address = None
+        if prefecture:
+            # 都道府県から始まる住所パターンを抽出
+            # 番地・号まで含む住所を抽出
+            address_pattern = rf'{re.escape(prefecture)}[^\s。、]{5,50}?(?:\d+[-ー\s]?\d+[-ー\s]?\d+|[0-9０-９]+[-ー\s]?[0-9０-９]+)'
+            address_match = re.search(address_pattern, text)
+            if address_match:
+                full_address = address_match.group(0)
+                # 余分な文字を除去
+                full_address = re.sub(r'[「」『』【】\(\)]', '', full_address).strip()
+
         if postal_code or prefecture:
             address_info = {
                 "postal_code": postal_code,
                 "prefecture": prefecture,
-                "city": None,  # Phase 2で実装
-                "address": None  # Phase 2で実装
+                "city": city,
+                "address": full_address
             }
             logger.debug(f"Extracted address: {address_info}")
             return address_info
@@ -229,10 +254,10 @@ class InfoExtractor:
         return result
 
     def extract_company_name(self, html: str) -> Optional[str]:
-        """会社名・店舗名を抽出
+        """会社名・店舗名を抽出（Phase 2で拡充）
 
         HTMLから会社名や店舗名を抽出します。
-        Phase 1では簡易実装、Phase 2で改善予定。
+        metaタグ、hタグ、JSON-LD、titleタグの順に試行します。
 
         Args:
             html: 解析対象のHTML文字列
@@ -247,15 +272,57 @@ class InfoExtractor:
         try:
             soup = BeautifulSoup(html, 'lxml')
 
-            # titleタグから抽出を試みる
+            # 1. JSON-LDから抽出を試みる（構造化データ）
+            json_ld_scripts = soup.find_all('script', type='application/ld+json')
+            for script in json_ld_scripts:
+                try:
+                    import json
+                    data = json.loads(script.string)
+                    # 組織名または店舗名を取得
+                    if isinstance(data, dict):
+                        name = data.get('name') or data.get('legalName')
+                        if name:
+                            logger.debug(f"Extracted company name from JSON-LD: {name}")
+                            return name.strip()
+                    elif isinstance(data, list):
+                        for item in data:
+                            if isinstance(item, dict):
+                                name = item.get('name') or item.get('legalName')
+                                if name:
+                                    logger.debug(f"Extracted company name from JSON-LD: {name}")
+                                    return name.strip()
+                except (json.JSONDecodeError, AttributeError) as e:
+                    logger.debug(f"Failed to parse JSON-LD: {e}")
+
+            # 2. metaタグのog:site_nameから抽出
+            og_site_name = soup.find('meta', property='og:site_name')
+            if og_site_name and og_site_name.get('content'):
+                company_name = og_site_name['content'].strip()
+                logger.debug(f"Extracted company name from og:site_name: {company_name}")
+                return company_name
+
+            # 3. h1タグから抽出（最初のh1を会社名とみなす）
+            h1 = soup.find('h1')
+            if h1 and h1.get_text():
+                company_name = h1.get_text().strip()
+                # 明らかに会社名ではないものを除外
+                if len(company_name) < 50 and '検索' not in company_name:
+                    logger.debug(f"Extracted company name from h1: {company_name}")
+                    return company_name
+
+            # 4. titleタグから抽出（従来の方法）
             title = soup.find('title')
             if title and title.string:
                 company_name = title.string.strip()
-                # 余分な文字列を除去（簡易版）
-                company_name = company_name.split('|')[0].strip()
-                company_name = company_name.split('-')[0].strip()
-                logger.debug(f"Extracted company name from title: {company_name}")
-                return company_name
+                # 余分な文字列を除去
+                separators = ['|', '-', '–', '—', '/', '＜', '【']
+                for sep in separators:
+                    if sep in company_name:
+                        company_name = company_name.split(sep)[0].strip()
+                        break
+                if len(company_name) > 0:
+                    logger.debug(f"Extracted company name from title: {company_name}")
+                    return company_name
 
         except Exception as e:
             logger.error(f"Error extracting company name: {e}")
@@ -347,7 +414,7 @@ class InfoExtractor:
         return phone.strip()
 
     def _validate_phone(self, phone: str) -> bool:
-        """電話番号の妥当性を検証
+        """電話番号の妥当性を検証（Phase 2で拡充）
 
         Args:
             phone: 電話番号文字列
@@ -358,15 +425,35 @@ class InfoExtractor:
         # ハイフンを除去した数字のみの文字列
         digits_only = re.sub(r'[^0-9]', '', phone)
 
-        # 10桁または11桁の電話番号のみ許可
-        if len(digits_only) not in [10, 11]:
-            return False
-
         # 0で始まること
         if not digits_only.startswith('0'):
             return False
 
-        return True
+        # 各種番号の桁数チェック
+        length = len(digits_only)
+
+        # フリーダイヤル (0120/0800)
+        if digits_only.startswith('0120') or digits_only.startswith('0800'):
+            return length == 10
+
+        # ナビダイヤル (0570)
+        if digits_only.startswith('0570'):
+            return length == 10
+
+        # IP電話 (050)
+        if digits_only.startswith('050'):
+            return length == 11
+
+        # 携帯電話 (070/080/090)
+        if digits_only.startswith(('070', '080', '090')):
+            return length == 11
+
+        # 固定電話 (市外局番による桁数の違い)
+        # 10桁または11桁を許可
+        if length in [10, 11]:
+            return True
+
+        return False
 
     def _validate_email(self, email: str) -> bool:
         """メールアドレスの妥当性を検証
@@ -387,3 +474,86 @@ class InfoExtractor:
             return False
 
         return True
+
+    def extract_business_hours(self, html: str) -> Optional[str]:
+        """営業時間を抽出（Phase 2で追加）
+
+        HTMLから営業時間を抽出します。
+
+        Args:
+            html: 解析対象のHTML文字列
+
+        Returns:
+            抽出された営業時間。見つからない場合はNone
+        """
+        if not html:
+            logger.warning("HTML is empty")
+            return None
+
+        text = self._strip_html_tags(html)
+
+        # 営業時間のパターン
+        patterns = [
+            r'営業時間[：:\s]*([^\n。、]{5,50})',
+            r'営業[：:\s]*([0-9０-９]+[時:：][0-9０-９]+[^\n。、]{0,30})',
+            r'受付時間[：:\s]*([^\n。、]{5,50})',
+            r'定休日を除く[：:\s]*([0-9０-９]+[時:：][0-9０-９]+[^\n。、]{0,30})',
+            r'([月火水木金土日祝]+)[：:\s]*([0-9０-９]+[時:：][0-9０-９]+[-~〜～][0-9０-９]+[時:：][0-9０-９]+)',
+        ]
+
+        for pattern in patterns:
+            try:
+                match = re.search(pattern, text)
+                if match:
+                    business_hours = match.group(1).strip() if len(match.groups()) == 1 else match.group(0).strip()
+                    # 長すぎる場合は先頭50文字のみ
+                    if len(business_hours) > 100:
+                        business_hours = business_hours[:100] + '...'
+                    logger.debug(f"Extracted business hours: {business_hours}")
+                    return business_hours
+            except re.error as e:
+                logger.error(f"Regex error in business hours pattern: {e}")
+
+        logger.debug("No business hours found")
+        return None
+
+    def extract_closed_days(self, html: str) -> Optional[str]:
+        """定休日を抽出（Phase 2で追加）
+
+        HTMLから定休日を抽出します。
+
+        Args:
+            html: 解析対象のHTML文字列
+
+        Returns:
+            抽出された定休日。見つからない場合はNone
+        """
+        if not html:
+            logger.warning("HTML is empty")
+            return None
+
+        text = self._strip_html_tags(html)
+
+        # 定休日のパターン
+        patterns = [
+            r'定休日[：:\s]*([^\n。、]{2,30})',
+            r'休業日[：:\s]*([^\n。、]{2,30})',
+            r'休み[：:\s]*([月火水木金土日祝、・]+)',
+            r'([月火水木金土日]+曜日?)休み',
+        ]
+
+        for pattern in patterns:
+            try:
+                match = re.search(pattern, text)
+                if match:
+                    closed_days = match.group(1).strip() if len(match.groups()) == 1 else match.group(0).strip()
+                    # 長すぎる場合は先頭50文字のみ
+                    if len(closed_days) > 50:
+                        closed_days = closed_days[:50] + '...'
+                    logger.debug(f"Extracted closed days: {closed_days}")
+                    return closed_days
+            except re.error as e:
+                logger.error(f"Regex error in closed days pattern: {e}")
+
+        logger.debug("No closed days found")
+        return None
