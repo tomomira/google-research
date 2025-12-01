@@ -253,10 +253,10 @@ class MainWindow(ctk.CTk):
                     self.after(0, lambda i=i: self.result_panel.show_progress(f"  [{i}/{len(search_items)}] {item.url}"))
 
                     # HTMLを取得
-                    html = self.scraper.fetch(item.url)
-                    if html:
+                    page_content = self.scraper.fetch_page(item.url)
+                    if page_content and page_content.html:
                         # 詳細情報を抽出
-                        detailed_info = self.extractor.extract_all(html)
+                        detailed_info = self.extractor.extract_all(page_content.html)
                         detailed_infos.append(detailed_info)
                     else:
                         detailed_infos.append(None)
