@@ -9,19 +9,24 @@
 ### 主な機能
 
 - **Tavily API統合検索**: 月1,000件まで無料で検索可能
-- **Webページからの詳細情報抽出**: 電話番号、メールアドレス、住所、SNSリンク等
+- **高精度な詳細情報抽出**:
+  - 13種類の電話番号パターン対応（固定/携帯/フリーダイヤル/IP電話等）
+  - 住所情報（郵便番号/都道府県/市区町村/詳細住所）
+  - 会社名・店舗名（JSON-LD/metaタグ/h1タグから抽出）
+  - 営業時間・定休日（Phase 2で追加） ✨NEW
+  - メールアドレス、FAX、SNSリンク
 - **Excel形式での自動出力**: 整形済みデータを即座にExcelファイルで取得
 - **柔軟なAPI切り替え**: TavilyとGoogle APIを簡単に切り替え可能
 - **CLI操作**: シンプルで直感的なコマンドライン操作
 
 ## 開発ステータス
 
-**Phase 1完了 - 本番運用可能！** ✨
+**Phase 2完了 - 抽出精度大幅向上！** ✨
 
 - [x] Phase 0: プロジェクト構造設計
-- [x] **Phase 1: MVP（基本検索・抽出・Excel出力）** ✅ 完了
+- [x] **Phase 1: MVP（基本検索・抽出・Excel出力）** ✅ 完了（2025年11月28日）
 - [x] **Tavily API統合** ✅ 完了（2025年11月28日）
-- [ ] Phase 2: 詳細情報抽出機能の拡充
+- [x] **Phase 2: 詳細情報抽出機能の拡充** ✅ 完了（2025年12月1日）
 - [ ] Phase 3: GUI実装
 - [ ] Phase 4: テスト・バグ修正・ドキュメント整備
 
@@ -122,7 +127,12 @@ python3 main.py
 ### 出力ファイル
 
 - **Excel**: `output/search_results_YYYYMMDD_HHMMSS.xlsx`
-  - 順位、タイトル、URL、説明、電話番号、メール、住所等
+  - **基本情報**: 順位、タイトル、URL、説明
+  - **連絡先**: 電話番号、メール、FAX
+  - **所在地**: 郵便番号、都道府県、市区町村
+  - **組織情報**: 会社名・店舗名
+  - **営業情報**: 営業時間、定休日 ✨NEW (Phase 2)
+  - **SNS**: Twitter、Facebook、Instagram
 - **ログ**: `logs/app.log`
 
 ## プロジェクト構造
@@ -148,7 +158,8 @@ google_research/
 ### 主要ドキュメント
 - [要件定義書](docs/requirements_specification.md) - 機能要件と非機能要件
 - [実装計画書](docs/implementation_plan.md) - システムアーキテクチャと詳細設計
-- [Phase 1完了報告](docs/PHASE1_COMPLETE.md) - 実装内容とテスト結果
+- [Phase 1完了報告](docs/PHASE1_COMPLETE.md) - MVP実装内容とテスト結果
+- [Phase 2完了報告](docs/PHASE2_COMPLETE.md) - 抽出精度向上と新機能 ✨NEW
 
 ### Tavily API関連
 - [Tavily APIセットアップガイド](docs/TAVILY_SETUP.md) - APIキー取得と設定手順
@@ -201,6 +212,15 @@ google_research/
 - **python-dotenv** - 環境変数管理
 
 ## 変更履歴
+
+- 2025-12-01:
+  - **Phase 2実装完了** - 詳細情報抽出機能の大幅拡充
+  - 電話番号抽出の精度向上（13種類のパターン対応）
+  - 住所抽出の精度向上（市区町村・詳細住所対応）
+  - 会社名抽出の改善（JSON-LD/metaタグ/h1タグ対応）
+  - 営業時間・定休日抽出機能を新規実装
+  - データモデル拡張（DetailedInfo/OutputData）
+  - テストコード作成（test_phase2.py）
 
 - 2025-11-28:
   - プロジェクト初期化、要件定義・実装計画作成

@@ -6,16 +6,17 @@
 
 ## プロジェクトステータス
 
-**現在のPhase**: Phase 1完了（Tavily API統合版）、Phase 2準備中
-**最終更新**: 2025年11月28日
+**現在のPhase**: Phase 2完了（詳細情報抽出拡充版）、Phase 3準備中
+**最終更新**: 2025年12月1日
 
 ### 完了済み
 - [x] Phase 0: プロジェクト構造設計、ドキュメント作成
 - [x] Phase 1: MVP（基本検索・抽出・Excel出力）✨
 - [x] Tavily API統合（2025年11月28日）✨
+- [x] Phase 2: 詳細情報抽出機能の拡充（2025年12月1日）✨NEW
 
 ### Phase 1完了内容（2025年11月28日）
-- [x] core/search_api.py - **Tavily/Google API統合クライアント** ✨NEW
+- [x] core/search_api.py - **Tavily/Google API統合クライアント** ✨
 - [x] core/scraper.py - Webページスクレイピング
 - [x] core/extractor.py - 情報抽出（電話、メール、住所、SNS等）
 - [x] output/formatter.py - データ整形・重複除去
@@ -26,8 +27,16 @@
 - [x] 基本機能テスト実施・合格
 - [x] Tavily API実運用テスト・合格
 
+### Phase 2完了内容（2025年12月1日）✨NEW
+- [x] **電話番号抽出の精度向上**: フリーダイヤル/ナビダイヤル/IP電話/携帯電話対応
+- [x] **住所抽出の精度向上**: 市区町村・詳細住所（番地・号）抽出
+- [x] **会社名抽出の改善**: JSON-LD/metaタグ/h1タグからの抽出
+- [x] **営業時間抽出機能**: 新規実装（正規表現パターン）
+- [x] **定休日抽出機能**: 新規実装（正規表現パターン）
+- [x] データモデル拡張: DetailedInfo/OutputDataに新フィールド追加
+- [x] test_phase2.py - Phase 2機能テスト・合格
+
 ### 次のステップ
-- [ ] Phase 2: 詳細情報抽出機能の拡充
 - [ ] Phase 3: GUI実装
 - [ ] Phase 4: テスト・バグ修正・ドキュメント整備
 
@@ -52,17 +61,23 @@
    - 使用方法
    - 次のステップ
 
-5. **検索API比較**: `docs/search_api_comparison.md` ✨NEW
+5. **Phase 2完了報告**: `docs/PHASE2_COMPLETE.md` ✨NEW
+   - 抽出精度向上の詳細
+   - 新機能（営業時間・定休日）
+   - テスト結果
+   - データモデル拡張
+
+6. **検索API比較**: `docs/search_api_comparison.md`
    - Tavily vs Google Custom Search API
    - コスト比較、精度比較
    - 段階的移行プラン
 
-6. **Tavily APIセットアップ**: `docs/TAVILY_SETUP.md` ✨NEW
+7. **Tavily APIセットアップ**: `docs/TAVILY_SETUP.md`
    - APIキー取得方法
    - 環境設定手順
    - トラブルシューティング
 
-7. **Tavily統合完了報告**: `docs/TAVILY_INTEGRATION.md` ✨NEW
+8. **Tavily統合完了報告**: `docs/TAVILY_INTEGRATION.md`
    - 統合内容と実装詳細
    - テスト結果
    - 運用開始ガイド
