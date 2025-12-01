@@ -48,7 +48,7 @@
 - [x] **CLI版と完全互換**: 同等の機能を実装
 - [x] **CustomTkinter**: モダンなUIフレームワーク採用
 
-### Phase 4完了内容（2025年12月1日）✨NEW
+### Phase 4完了内容（2025年12月1日）
 - [x] **テストスイート作成**: pytest基盤の42テストケース
   - tests/test_extractor.py: 22テスト
   - tests/test_formatter.py: 13テスト
@@ -59,8 +59,14 @@
 - [x] **開発者ガイド**: 約500行の詳細なガイド
 - [x] **バグ修正**: Excel列名の日本語化バグ修正
 
+### ユーザーテスト後のバグ修正（2025年12月1日）✨NEW
+- [x] **GUI版検索API呼び出し修正**: パラメータ名の不一致を修正（commit: 52cdb51）
+- [x] **WebScraperメソッド名修正**: `fetch()` → `fetch_page()` に修正（commit: e99c724）
+- [x] **エラーハンドリング改善**: 個別サイトエラー時も処理続行（commit: c7a5953）
+- [x] **動作確認完了**: CLI/GUI両版で実運用テスト合格
+
 ### プロジェクト完了
-すべてのPhaseが完了し、本番運用可能な状態に達しました。
+すべてのPhaseが完了し、ユーザーテストも完了。本番運用可能な状態に達しました。
 
 ## 主要ドキュメント
 
@@ -113,17 +119,22 @@
    - コーディング規約
    - テスト・デバッグ・リリース手順
 
-10. **検索API比較**: `docs/search_api_comparison.md`
+10. **バグ修正報告書**: `docs/BUGFIX_REPORT.md` ✨NEW
+   - ユーザーテスト後に発見されたバグ3件
+   - 修正内容と再発防止策
+   - 動作確認結果
+
+11. **検索API比較**: `docs/search_api_comparison.md`
    - Tavily vs Google Custom Search API
    - コスト比較、精度比較
    - 段階的移行プラン
 
-11. **Tavily APIセットアップ**: `docs/TAVILY_SETUP.md`
+12. **Tavily APIセットアップ**: `docs/TAVILY_SETUP.md`
    - APIキー取得方法
    - 環境設定手順
    - トラブルシューティング
 
-12. **Tavily統合完了報告**: `docs/TAVILY_INTEGRATION.md`
+13. **Tavily統合完了報告**: `docs/TAVILY_INTEGRATION.md`
    - 統合内容と実装詳細
    - テスト結果
    - 運用開始ガイド

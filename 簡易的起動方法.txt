@@ -1,0 +1,17 @@
+youtube-video-analyzer 簡易的起動方法
+
+  # WSL環境
+  cd C:\Users\tomom\docker-container-2025\test\google-research
+  wsl -d Ubuntu
+  
+  # 仮想環境
+  source venv/bin/activate
+
+  # アプリケーションを起動
+  
+  CLI起動
+  python main.py
+  
+  GUI起動
+  python main_gui.py
+
